@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyAccount;
 
 class AuthController extends Controller
 {
@@ -50,7 +52,9 @@ public function signup(Request $request) {
         ];
         try {
             $user = User::create($user_data);
-            return response()->json($user, 200);
+            $link = '/verify/' . $user['verify_code'] . '/' . $user['email'];
+            Mail::to($user['email'])->send(new VerifyAccount($user['email'], $link));
+            return response()->json($user,200);
         }
         catch (\Exception $exception) {
             return response()->json($exception->getMessage(), 500);
@@ -70,25 +74,33 @@ public function signup(Request $request) {
                 'password.required' => 'Password can not be blank !',
             ]
         );
-        $credentials = request(['email', 'password']);
-        if (!Auth::attempt($credentials)) {
+        $checkVerified = User::where('email', $request->email)->get()->first();
+        if ($checkVerified->verified == 1) {
+            $credentials = request(['email', 'password']);
+            if (!Auth::attempt($credentials)) {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            $user = $request->user();
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+            if ($request->remember_me)
+                $token->expires_at = Carbon::now()->addWeeks(1);
+            $token->save();
             return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
+                'access_token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => Carbon::parse(
+                    $tokenResult->token->expires_at
+                )->toDateTimeString()
+            ]);
         }
-        $user = $request->user();
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-        $token->save();
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
-        ]);
+        else {
+            return response()->json([
+                "message" => 'Not yet authentic'
+            ], 500);
+        }
     }
     public function logout(Request $request) {
         $request->user()->token()->revoke();
@@ -100,4 +112,29 @@ public function signup(Request $request) {
     {
         return response()->json(Auth::user());
     }
+    public function verify($code, $email) {
+        try {
+            $user = User::where('email', '=', $email)
+                ->where('verify_code', '=', $code)
+                ->get()
+                ->first();
+            if ($user) {
+                User::find($user['id'])
+                    ->update(['verified' => 1, 'updated_at' => getCurrentTime()]);
+                return response()->json(User::find($user['id']), 200);
+            }
+            else {
+                return response()->json([
+                    'message' => 'Unknown User or PIN code wrong!',
+                ], 401);
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json($exception->getMessage(), 500);
+        }
+    }
+//    public function test ($email) {
+//        $checkVerified = User::where('email', $email)->get()->first();
+//        return response()->json($checkVerified);
+//    }
 }

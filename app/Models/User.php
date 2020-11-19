@@ -19,6 +19,6 @@ class User extends Authenticatable
         'id', 'username', 'email', 'avatar', 'remember_token',
         'created_at', 'updated_at', 'verified', 'password', 'verify_code'
     ];
-    protected $hidden = ['password', 'remember_token', 'verify_code'];
+    protected $hidden = ['password', 'remember_token'];
     public $timestamps = false;
 }

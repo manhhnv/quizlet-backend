@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyAccount;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,6 +23,7 @@ Route::group([
 ], function () {
     Route::post('login', 'Api\AuthController@login');
     Route::post('signup', 'Api\AuthController@signup');
+    Route::get('verify/{code}/{email}', 'Api\AuthController@verify');
 
     Route::group([
         'middleware' => 'auth:api'
@@ -29,3 +32,5 @@ Route::group([
         Route::get('user', 'Api\AuthController@user');
     });
 });
+
+//Route::get('test/{email}', 'Api\AuthController@test');
