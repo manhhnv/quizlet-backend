@@ -33,4 +33,15 @@ Route::group([
     });
 });
 
+//Class
+Route::group([
+    'prefix' => 'class',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('all', 'Api\ClassController@all');
+    Route::post('create', 'Api\ClassController@create');
+    Route::put('update/{id}', 'Api\ClassController@update');
+    Route::delete('delete/{id}', 'Api\ClassController@delete');
+});
+
 //Route::get('test/{email}', 'Api\AuthController@test');

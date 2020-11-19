@@ -21,4 +21,9 @@ class User extends Authenticatable
     ];
     protected $hidden = ['password', 'remember_token'];
     public $timestamps = false;
+
+    public function classes() {
+        return $this->hasMany('App\Models\ClassModel', 'user_id', 'id');
+    }
+
 }
