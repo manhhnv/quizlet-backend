@@ -44,4 +44,15 @@ Route::group([
     Route::delete('delete/{id}', 'Api\ClassController@delete');
 });
 
+//Module
+Route::group([
+    'prefix' => 'module',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('allModules', 'Api\ModuleController@allModules');
+    Route::get('selfModule', 'Api\ModuleController@selfModule');
+    Route::post('create', 'Api\ModuleController@create');
+    Route::put('update/{id}', 'Api\ModuleController@update');
+    Route::delete('delete/{id}', 'Api\ModuleController@delete');
+});
 //Route::get('test/{email}', 'Api\AuthController@test');
