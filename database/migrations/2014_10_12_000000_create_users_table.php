@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password', 255);
             $table->string('avatar', 255)->nullable(true);
             $table->boolean('verified')->default(false);
-            $table->bigInteger('verify_code');
+            $table->string('verify_code', 10);
             $table->rememberToken();
             $table->timestamps();
         });

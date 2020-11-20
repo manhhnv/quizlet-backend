@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyAccount;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,3 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+//Route::get('/send-mail', function () {
+//
+//    Mail::to('newuser@example.com')->send(new VerifyAccount('nguyenmanh@gmail.com'));
+//
+//    return 'A message has been sent to Mailtrap!';
+//
+//});

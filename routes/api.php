@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyAccount;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,6 +23,7 @@ Route::group([
 ], function () {
     Route::post('login', 'Api\AuthController@login');
     Route::post('signup', 'Api\AuthController@signup');
+    Route::get('verify/{code}/{email}', 'Api\AuthController@verify');
 
     Route::group([
         'middleware' => 'auth:api'
@@ -29,3 +32,27 @@ Route::group([
         Route::get('user', 'Api\AuthController@user');
     });
 });
+
+//Class
+Route::group([
+    'prefix' => 'class',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('all', 'Api\ClassController@all');
+    Route::post('create', 'Api\ClassController@create');
+    Route::put('update/{id}', 'Api\ClassController@update');
+    Route::delete('delete/{id}', 'Api\ClassController@delete');
+});
+
+//Module
+Route::group([
+    'prefix' => 'module',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('allModules', 'Api\ModuleController@allModules');
+    Route::get('selfModule', 'Api\ModuleController@selfModule');
+    Route::post('create', 'Api\ModuleController@create');
+    Route::put('update/{id}', 'Api\ModuleController@update');
+    Route::delete('delete/{id}', 'Api\ModuleController@delete');
+});
+//Route::get('test/{email}', 'Api\AuthController@test');
