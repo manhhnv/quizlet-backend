@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateClassHasModuleTable extends Migration
+class CreateFolderHasModuleTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateClassHasModuleTable extends Migration
      */
     public function up()
     {
-        Schema::create('class_has_module', function (Blueprint $table) {
+        Schema::create('folder_has_module', function (Blueprint $table) {
+            $table->unsignedBigInteger('folder_id');
             $table->unsignedBigInteger('module_id');
-            $table->unsignedBigInteger('class_id');
+            $table->foreign('folder_id')->references('id')->on('folder')
+                ->onDelete('cascade');
             $table->foreign('module_id')->references('id')->on('module')
                 ->onDelete('cascade');
-            $table->foreign('class_id')->references('id')->on('class')
-                ->onDelete('cascade');
-            $table->primary(array('module_id', 'class_id'));
+            $table->primary(array('folder_id', 'module_id'));
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ class CreateClassHasModuleTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('class_has_module');
+        Schema::dropIfExists('folder_has_module');
     }
 }

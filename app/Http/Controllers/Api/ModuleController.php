@@ -37,8 +37,6 @@ class ModuleController extends Controller
                 'name' => 'required | string',
                 'public' => 'boolean',
                 'max_score' => 'integer',
-                'class_id' => 'integer',
-                'folder_id' => 'integer'
             ],
             [
                 'name.required' => 'Module name can not be blank !',
@@ -52,8 +50,6 @@ class ModuleController extends Controller
                 'max_score' => (int) ($request->max_score),
                 'public' => (int) ($request->public),
                 'user_id' => $user->id,
-                'class_id' => isset($request->class_id) ? (int) $request->class_id : null,
-                'folder_id' => isset($request->folder_id) ? (int) $request->folder_id : null,
                 'created_at' => $current_time,
                 'updated_at' => $current_time,
             ];

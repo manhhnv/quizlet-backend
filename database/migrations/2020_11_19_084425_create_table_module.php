@@ -18,13 +18,7 @@ class CreateTableModule extends Migration
             $table->string('name', 100)->nullable(false);
             $table->integer('max_score')->nullable(false);
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('class_id')->nullable(true);
-            $table->unsignedBigInteger('folder_id')->nullable(true);
             $table->foreign('user_id')->references('id')->on('users')
-                ->onDelete('cascade');
-            $table->foreign('class_id')->references('id')->on('class')
-                ->onDelete('cascade');
-            $table->foreign('folder_id')->references('id')->on('folder')
                 ->onDelete('cascade');
             $table->boolean('public')->nullable(false)->default(false);
             $table->timestamps();

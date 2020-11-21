@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassHasModule;
 use App\Models\ClassModel;
+use App\Models\Module;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ClassController extends Controller
 {
@@ -101,6 +104,82 @@ class ClassController extends Controller
             return response()->json([
                 'message' => $exception->getMessage()
             ], 500);
+        }
+    }
+
+    public function modules(Request $request) {
+        $user = Auth::user();
+        $req_class_id = (int) $request->query('class_id');
+        if ($req_class_id) {
+            $class = ClassModel::find($req_class_id);
+            $class_user_id = $class->user->id;
+            if ($class_user_id == $user->id) {
+                try {
+                    $modules = DB::table('module')
+                        ->join('class_has_module', 'module.id', '=', 'class_has_module.module_id')
+                        ->where('class_has_module.class_id', '=', $req_class_id)
+                        ->select('module.*')
+                        ->get();
+                    return response($modules, 200);
+                }
+                catch (\Exception $exception) {
+                    return response()->json([
+                        'message' => 'Something wrong !'
+                    ], 500);
+                }
+            }
+            else {
+                return response()->json([
+                    'message' => 'Class not found'
+                ], 500);
+            }
+        }
+    }
+    public function assignModule($module_id, $class_id) {
+        $user = Auth::user();
+        if ($user) {
+            $module = Module::find($module_id);
+            $class = ClassModel::find($class_id);
+            $module_user_id = $module->user->id;
+            $class_user_id = $class->user->id;
+            if ($user->id == $module_user_id && $user->id == $class_user_id) {
+                $current_time = getCurrentTime();
+                $data = [
+                    'module_id' => (int) $module_id,
+                    'class_id' => (int) $class_id,
+                    'created_at' => $current_time,
+                    'updated_at' => $current_time
+                ];
+                try {
+                    $instance = ClassHasModule::create($data);
+                    return response()->json($instance, 200);
+                }
+                catch (\Exception $exception) {
+                    return response([
+                        'message' => "Assign module to class failed !"
+                    ], 500);
+                }
+            }
+        }
+    }
+    public function deleteModule(Request $request) {
+        $user = Auth::user();
+        $req_module_id = (int) $request->query('module_id');
+        $req_class_id = (int) $request->query('class_id');
+        if ($req_module_id && $req_class_id) {
+            $class = ClassModel::find($req_class_id);
+            $class_user_id = $class->user->id;
+            if ($class_user_id == $user->id) {
+                try {
+                    ClassHasModule::where('class_id', '=', $req_class_id)
+                        ->where('module_id', '=', $req_module_id)
+                        ->delete();
+                    return $this->modules($request);
+                }
+                catch (\Exception $exception) {
+                    return response()->json(['message' => 'Not found'], 500);
+                }
+            }
         }
     }
 }
