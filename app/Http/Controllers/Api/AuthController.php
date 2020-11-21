@@ -19,13 +19,15 @@ public function signup(Request $request) {
                 'username' => 'required | string | unique:users',
                 'email' => 'required | string | email | unique:users',
                 'password' => 'required|min:6|regex:/^.*(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
+                'birthday' => 'required|date|date_format:Y-m-d',
             ],
             [
                 'username.required' => 'Username fill can not be blank!',
                 'email.required' => 'Email fill can not be blank!',
                 'password.required' => 'Password fill can not be blank!',
                 'password.min' => 'Password contain at least 6 characters, include uppercase, lowercase and number',
-                'password.regex' => 'Password must be included uppercase, lowercase and number'
+                'password.regex' => 'Password must be included uppercase, lowercase and number',
+                'birthday.required' => 'Birthday can not be blank!'
             ]
         );
         if ($request->hasFile('avatar')) {
@@ -45,6 +47,7 @@ public function signup(Request $request) {
             'email' => $email,
             'password' => bcrypt($request->password),
             'avatar' => isset($avatarPath) ? $avatarPath : null,
+            'birthday' => date('Y-m-d', strtotime(htmlspecialchars($request->birthday))),
             'verified' => false,
             'verify_code' => $random,
             'created_at' => $currentTime,
@@ -93,7 +96,8 @@ public function signup(Request $request) {
                 'token_type' => 'Bearer',
                 'expires_at' => Carbon::parse(
                     $tokenResult->token->expires_at
-                )->toDateTimeString()
+                )->toDateTimeString(),
+                'user' => $user
             ]);
         }
         else {
