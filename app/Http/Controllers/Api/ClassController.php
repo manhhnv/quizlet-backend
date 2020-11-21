@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ClassController extends Controller
 {
@@ -40,10 +41,12 @@ class ClassController extends Controller
         );
         if ($user) {
             $current_time = getCurrentTime();
+            $code = Str::random(16);
             $class_data = [
                 'name' => htmlspecialchars($request->name),
                 'public' => (int) $request->public,
                 'user_id' => $user['id'],
+                'code' => $code,
                 'created_at' => $current_time,
                 'updated_at' => $current_time
             ];

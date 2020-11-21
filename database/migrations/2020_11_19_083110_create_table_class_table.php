@@ -17,6 +17,7 @@ class CreateTableClassTable extends Migration
             $table->id();
             $table->string('name', 100)->nullable(false);
             $table->boolean('public')->nullable(false)->default(true);
+            $table->string('code', 255)->nullable(true);
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')
                 ->onDelete('cascade');

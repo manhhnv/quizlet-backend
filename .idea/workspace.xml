@@ -20,15 +20,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="21f3b9df-72d7-467d-bbc2-d3f83d007fb8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/Models/ClassHasModule.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2020_11_21_090436_create_folder_has_module_table.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.rnd" beforeDir="false" afterPath="$PROJECT_DIR$/.rnd" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ClassController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ClassController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ModuleController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ModuleController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_11_19_084425_create_table_module.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_11_19_084425_create_table_module.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_11_20_015932_create_class_has_module_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_11_20_015932_create_class_has_module_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/ClassModel.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/ClassModel.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2020_11_19_083110_create_table_class_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_11_19_083110_create_table_class_table.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -215,7 +211,7 @@
       <workItem from="1605849275837" duration="1629000" />
       <workItem from="1605864943278" duration="12444000" />
       <workItem from="1605945468975" duration="413000" />
-      <workItem from="1605948228494" duration="5515000" />
+      <workItem from="1605948228494" duration="8356000" />
     </task>
     <servers />
   </component>
