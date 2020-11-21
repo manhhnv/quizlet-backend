@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('avatar', 255)->nullable(true);
             $table->boolean('verified')->default(false);
             $table->string('verify_code', 10);
+            $table->date('birthday')->nullable(true);
             $table->rememberToken();
             $table->timestamps();
         });
