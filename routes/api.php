@@ -63,6 +63,9 @@ Route::group([
     ], function () {
         Route::post('create', 'Api\TermController@create');
         Route::get('detail/{id}', 'Api\TermController@index');
+        Route::get('get-list-terms/{module_id}', 'Api\TermController@getTermByModule');
+        Route::put('update-term-by-module/{module_id}/{term_id}', 'Api\TermController@update');
+        Route::delete('delete/{module_id}/{term_id}', 'Api\TermController@delete');
     });
 });
 //Route::get('test/{email}', 'Api\AuthController@test');

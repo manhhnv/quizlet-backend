@@ -15,7 +15,16 @@ class TermController extends Controller
         return response()->json($term);
     }
     public function getTermByModule($module_id) {
-
+        try {
+            $module = Module::find($module_id);
+            $terms = $module->terms;
+            return response($terms, 200);
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                'message' => 'Not found module'
+            ], 500);
+        }
     }
     public function create(Request $request) {
         $this->validate(
@@ -37,11 +46,14 @@ class TermController extends Controller
         $module = Module::find($module_id);
         $module_user_id = $module->user->id;
         if ($user->id == $module_user_id) {
+            $current_time = getCurrentTime();
             $term_data = [
                 'question' => htmlspecialchars($request->question),
                 'explain' => htmlspecialchars($request->explain),
                 'score' => (int) $request->score,
-                'module_id' => $module_id
+                'module_id' => $module_id,
+                'created_at' => $current_time,
+                'updated_at' => $current_time
             ];
             try {
                 $term = Term::create($term_data);
@@ -59,20 +71,22 @@ class TermController extends Controller
             ], 500);
         }
     }
-    public function update($term_id, Request $request) {
+    public function update($module_id, $term_id, Request $request) {
         $this->validate(
             $request,
             [
-                'question' => 'string',
-                'explain' => 'string',
-                'score' => 'integer'
+                'question' => 'string|nullable',
+                'explain' => 'string|nullable',
+                'score' => 'integer|nullable'
             ]
         );
         $term = Term::find($term_id);
-        if ($term) {
+        if ($term && $term->module->id == $module_id) {
             $update_data = [
                 'question' => isset($request->question) ? htmlspecialchars($request->question) : $term->question,
-                'explain' => isset($request->explain) ? htmlspecialchars($request->explain) : $term->explain
+                'explain' => isset($request->explain) ? htmlspecialchars($request->explain) : $term->explain,
+                'score' => isset($request->score) ? (int) $request->score : $term->score,
+                'updated_at' => getCurrentTime()
             ];
             try {
                 $term->update($update_data);
@@ -84,12 +98,17 @@ class TermController extends Controller
                 ], 500);
             }
         }
+        else {
+            return response()->json([
+                'message' => 'Term not found in your module'
+            ], 500);
+        }
     }
     public function delete($module_id, $term_id) {
         try {
             $term = Term::find($term_id);
             $term->delete();
-            $module = Module::find($term_id);
+            $module = Module::find($module_id);
             $terms = $module->terms;
             return response()->json($terms, 200);
         }
