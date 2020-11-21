@@ -37,6 +37,7 @@ class ModuleController extends Controller
                 'name' => 'required | string',
                 'public' => 'boolean',
                 'max_score' => 'integer',
+                'description' => 'string'
             ],
             [
                 'name.required' => 'Module name can not be blank !',
@@ -50,6 +51,7 @@ class ModuleController extends Controller
                 'max_score' => (int) ($request->max_score),
                 'public' => (int) ($request->public),
                 'user_id' => $user->id,
+                'description' => htmlspecialchars($request->description),
                 'created_at' => $current_time,
                 'updated_at' => $current_time,
             ];

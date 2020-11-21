@@ -57,5 +57,12 @@ Route::group([
     Route::post('create', 'Api\ModuleController@create');
     Route::put('update/{id}', 'Api\ModuleController@update');
     Route::delete('delete/{id}', 'Api\ModuleController@delete');
+
+    Route::group([
+        'prefix' => 'term'
+    ], function () {
+        Route::post('create', 'Api\TermController@create');
+        Route::get('detail/{term_id}', 'Api\TermController@index');
+    });
 });
 //Route::get('test/{email}', 'Api\AuthController@test');

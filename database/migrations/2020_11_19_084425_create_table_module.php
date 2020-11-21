@@ -21,6 +21,7 @@ class CreateTableModule extends Migration
             $table->foreign('user_id')->references('id')->on('users')
                 ->onDelete('cascade');
             $table->boolean('public')->nullable(false)->default(false);
+            $table->text('description')->nullable(true);
             $table->timestamps();
         });
     }
