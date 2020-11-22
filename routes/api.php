@@ -92,7 +92,7 @@ Route::group([
     'prefix' => 'member',
     'middleware' => 'auth:api'
 ], function () {
-    Route::get('list-joined-members', 'Api\MembersController@listMembers');
+    Route::get('list-joined-members/{class_id}', 'Api\MembersController@listMembers');
     Route::get('list-joined-classes', 'Api\MembersController@joinedClass');
     Route::post('join-class/{class_id}', 'Api\MembersController@join');
     Route::delete('leave-joined-class/{class_id}', 'Api\MembersController@leaveClass');

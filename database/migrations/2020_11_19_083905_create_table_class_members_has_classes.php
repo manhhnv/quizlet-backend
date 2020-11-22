@@ -15,7 +15,7 @@ class CreateTableClassMembersHasClasses extends Migration
     {
         Schema::create('members_has_classes', function (Blueprint $table) {
             $table->unsignedBigInteger('member_id');
-            $table->foreign('member_id')->references('id')->on('members')
+            $table->foreign('member_id')->references('user_id')->on('members')
                 ->onDelete('cascade');
             $table->unsignedBigInteger('class_id');
             $table->foreign('class_id')->references('id')->on('class')

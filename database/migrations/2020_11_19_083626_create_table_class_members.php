@@ -14,8 +14,11 @@ class CreateTableClassMembers extends Migration
     public function up()
     {
         Schema::create('members', function (Blueprint $table) {
-            $table->id();
             $table->string('username', 100)->nullable(false);
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onDelete('cascade');
+            $table->primary('user_id');
             $table->timestamps();
         });
     }
