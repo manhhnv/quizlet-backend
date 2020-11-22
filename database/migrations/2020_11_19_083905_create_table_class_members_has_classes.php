@@ -20,6 +20,7 @@ class CreateTableClassMembersHasClasses extends Migration
             $table->unsignedBigInteger('class_id');
             $table->foreign('class_id')->references('id')->on('class')
                 ->onDelete('cascade');
+            $table->primary(array('member_id', 'class_id'));
             $table->timestamps();
         });
     }

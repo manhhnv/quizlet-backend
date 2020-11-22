@@ -87,5 +87,15 @@ Route::group([
         Route::delete('delete-from-folder', 'Api\FolderController@deleteModuleFromFolder');
     });
 });
-
+//Member
+Route::group([
+    'prefix' => 'member',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('list-joined-members', 'Api\MembersController@listMembers');
+    Route::get('list-joined-classes', 'Api\MembersController@joinedClass');
+    Route::post('join-class/{class_id}', 'Api\MembersController@join');
+    Route::delete('leave-joined-class/{class_id}', 'Api\MembersController@leaveClass');
+    Route::delete('delete-joined-member', 'Api\MembersController@deleteMemberFromClass');
+});
 //Route::get('test/{email}', 'Api\AuthController@test');
