@@ -68,4 +68,24 @@ Route::group([
         Route::delete('delete/{module_id}/{term_id}', 'Api\TermController@delete');
     });
 });
+
+//Folder
+Route::group([
+    'prefix' => 'folder',
+    'middleware' => 'auth:api'
+], function () {
+    Route::post('create', 'Api\FolderController@create');
+    Route::get('detail/{id}', 'Api\FolderController@index');
+    Route::get('listFolder', 'Api\FolderController@listFolders');
+    Route::put('update/{folder_id}', 'Api\FolderController@update');
+    Route::delete('delete/{id}', 'Api\FolderController@delete');
+    Route::group([
+        'prefix' => 'module'
+    ], function (){
+        Route::get('list', 'Api\FolderController@modules');
+        Route::get('assign-to-folder/{module_id}/{folder_id}', 'Api\FolderController@assignModule');
+        Route::delete('delete-from-folder', 'Api\FolderController@deleteModuleFromFolder');
+    });
+});
+
 //Route::get('test/{email}', 'Api\AuthController@test');

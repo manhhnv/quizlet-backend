@@ -20,6 +20,7 @@ class CreateTableFolder extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')
                 ->onDelete('cascade');
+            $table->text('description')->nullable(true);
             $table->timestamps();
         });
     }

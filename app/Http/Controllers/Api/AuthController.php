@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyAccount;
+use App\Jobs\SendVerifyMail;
 
 class AuthController extends Controller
 {
@@ -56,7 +57,7 @@ public function signup(Request $request) {
         try {
             $user = User::create($user_data);
             $link = '/verify/' . $user['verify_code'] . '/' . $user['email'];
-            Mail::to($user['email'])->send(new VerifyAccount($user['email'], $link));
+            $this->dispatch(new SendVerifyMail($user['email'], $link));
             return response()->json($user,200);
         }
         catch (\Exception $exception) {

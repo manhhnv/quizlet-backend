@@ -29,4 +29,7 @@ class User extends Authenticatable
     public function modules() {
         return $this->hasMany('App\Models\Module', 'user_id', 'id');
     }
+    public function folders() {
+        return $this->hasMany('App\Models\Folder', 'user_id', 'id');
+    }
 }
