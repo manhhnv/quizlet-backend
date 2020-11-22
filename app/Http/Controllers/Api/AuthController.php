@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyAccount;
 use App\Jobs\SendVerifyMail;
+use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends Controller
 {
@@ -126,7 +127,10 @@ public function signup(Request $request) {
             if ($user) {
                 User::find($user['id'])
                     ->update(['verified' => 1, 'updated_at' => getCurrentTime()]);
-                return response()->json(User::find($user['id']), 200);
+                $user = User::find($user['id']);
+                if ($user->verified == 1) {
+                    return Redirect::to('http://localhost:3000/home');
+                }
             }
             else {
                 return response()->json([
