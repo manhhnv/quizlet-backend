@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FolderController extends Controller
 {
@@ -58,13 +59,15 @@ class FolderController extends Controller
         $user = Auth::user();
         if ($user) {
             $current_time = getCurrentTime();
+            $code = Str::random(25);
             $folder_data = [
                 'name' => htmlspecialchars($request->name),
                 'public' => (int) $request->public,
                 'description' => htmlspecialchars($request->description),
                 'created_at' => $current_time,
                 'updated_at' => $current_time,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'code' => $code
             ];
             try {
                 $folder = Folder::create($folder_data);
@@ -96,7 +99,7 @@ class FolderController extends Controller
             $update_data = [
                 'name' => isset($request->name) ? htmlspecialchars($request->name) : $folder->name,
                 'public' => isset($request->public) ? (int) $request->public : $folder->public,
-                'description' => isset($request->description) ? htmlspecialchars($request->description) : $folder->description
+                'description' => htmlspecialchars($request->description)
             ];
             try {
                 $folder->update($update_data);

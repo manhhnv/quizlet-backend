@@ -21,6 +21,7 @@ class CreateTableFolder extends Migration
             $table->foreign('user_id')->references('id')->on('users')
                 ->onDelete('cascade');
             $table->text('description')->nullable(true);
+            $table->string('code', 255)->nullable(true);
             $table->timestamps();
         });
     }

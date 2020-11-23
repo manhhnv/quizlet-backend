@@ -10,7 +10,7 @@ class Folder extends Model
     protected $primaryKey = 'id';
     protected $fillable = [
         'id', 'name', 'public', 'user_id', 'description',
-        'created_at', 'updated_at'
+        'created_at', 'updated_at', 'code'
     ];
     public $timestamps = false;
     public function user() {

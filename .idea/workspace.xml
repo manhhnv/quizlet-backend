@@ -20,13 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="21f3b9df-72d7-467d-bbc2-d3f83d007fb8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/Models/ClassHasFolder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/migrations/2020_11_23_030925_create_class_has_folder_table.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ClassController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ClassController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/FolderController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/FolderController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ModuleController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ModuleController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Folder.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Folder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2020_11_19_084233_create_table_folder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_11_19_084233_create_table_folder.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,7 +214,7 @@
       <workItem from="1606010711387" duration="10000" />
       <workItem from="1606039223055" duration="23321000" />
       <workItem from="1606100753299" duration="459000" />
-      <workItem from="1606101217229" duration="9069000" />
+      <workItem from="1606101217229" duration="13142000" />
     </task>
     <servers />
   </component>
