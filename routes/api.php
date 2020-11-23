@@ -45,6 +45,11 @@ Route::group([
     Route::post('assign-module-to-class/{module_id}/{class_id}', 'Api\ClassController@assignModule');
     Route::get('modules', 'Api\ClassController@modules');
     Route::delete('delete-module/module', 'Api\ClassController@deleteModule');
+    Route::group([
+        'prefix' => 'folder'
+    ], function () {
+//        Route::
+    });
 });
 
 //Module

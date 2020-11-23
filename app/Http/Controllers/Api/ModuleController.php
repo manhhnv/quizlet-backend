@@ -101,9 +101,10 @@ class ModuleController extends Controller
         if ($user_id == $user->id) {
             try {
                 Module::find($id)->delete();
-                return response()->json([
-                    'message' => 'Deleted success'
-                ], 200);
+                return $this->allModules();
+//                return response()->json([
+//                    'message' => 'Deleted success'
+//                ], 200);
             }
             catch (\Exception $exception) {
                 return response()->json([

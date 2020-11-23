@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Folder;
 use App\Models\FolderHasModule;
 use App\Models\Module;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +63,8 @@ class FolderController extends Controller
                 'public' => (int) $request->public,
                 'description' => htmlspecialchars($request->description),
                 'created_at' => $current_time,
-                'updated_at' => $current_time
+                'updated_at' => $current_time,
+                'user_id' => $user->id
             ];
             try {
                 $folder = Folder::create($folder_data);
@@ -71,7 +72,7 @@ class FolderController extends Controller
             }
             catch (\Exception $exception) {
                 return response()->json([
-                    "message" => 'Create folder failed'
+                    "message" => $exception->getMessage()
                 ], 500);
             }
         }
