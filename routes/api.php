@@ -80,16 +80,18 @@ Route::group([
     'middleware' => 'auth:api'
 ], function () {
     Route::post('create', 'Api\FolderController@create');
-    Route::get('detail/{id}', 'Api\FolderController@index');
+    Route::get('detail', 'Api\FolderController@index');
     Route::get('listFolder', 'Api\FolderController@listFolders');
     Route::put('update/{folder_id}', 'Api\FolderController@update');
     Route::delete('delete/{id}', 'Api\FolderController@delete');
+    Route::get('folder-detail', 'Api\FolderController@folderDetail');
     Route::group([
         'prefix' => 'module'
     ], function (){
         Route::get('list', 'Api\FolderController@modules');
-        Route::get('assign-to-folder/{module_id}/{folder_id}', 'Api\FolderController@assignModule');
+        Route::post('assign-to-folder/{module_id}/{folder_id}', 'Api\FolderController@assignModule');
         Route::delete('delete-from-folder', 'Api\FolderController@deleteModuleFromFolder');
+        Route::post('add-module-in-folder/{id}/{code}', 'Api\FolderController@addModuleInFolder');
     });
 });
 //Member

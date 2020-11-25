@@ -18,7 +18,7 @@ public function signup(Request $request) {
         $this->validate(
             $request,
             [
-                'username' => 'required | string | unique:users',
+                'username' => 'required | string |min:6| unique:users',
                 'email' => 'required | string | email | unique:users',
                 'password' => 'required|min:6|regex:/^.*(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
                 'birthday' => 'required|date|date_format:Y-m-d',
