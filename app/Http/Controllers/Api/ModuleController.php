@@ -3,13 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Folder;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Module;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ModuleController extends Controller
 {
+    public function index($id) {
+        try {
+            $module = Module::find($id);
+            return response()->json($module, 200);
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
+        }
+    }
     public function allModules() {
         $modules = Module::all();
         return response()->json($modules, 200);
@@ -109,6 +122,33 @@ class ModuleController extends Controller
             catch (\Exception $exception) {
                 return response()->json([
                     "message" => $exception->getMessage()
+                ], 500);
+            }
+        }
+    }
+    public function modulesInFolderService($folder_id) {
+        $user = Auth::user();
+        if ($folder_id) {
+            $folder = Folder::find($folder_id);
+            $folder_user_id = $folder->user->id;
+            if ($folder_user_id == $user->id) {
+                try {
+                    $modules = DB::table('module')
+                        ->join('folder_has_module', 'module_id', '=', 'module.id')
+                        ->where('folder_has_module.folder_id', '=', $folder_id)
+                        ->select('module.*')
+                        ->get();
+                    return response()->json($modules, 200);
+                }
+                catch (\Exception $exception) {
+                    return response()->json([
+                        'message' => $exception->getMessage()
+                    ], 500);
+                }
+            }
+            else {
+                return response()->json([
+                    'message' => 'Get modules by folder failed'
                 ], 500);
             }
         }

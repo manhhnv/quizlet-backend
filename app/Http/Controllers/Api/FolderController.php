@@ -14,24 +14,51 @@ use Illuminate\Support\Str;
 
 class FolderController extends Controller
 {
-    public function index($id) {
+    private $module_service;
+    public function __construct() {
+        $this->module_service = new ModuleController();
+    }
+
+    public function folderDetail($folder_id) {
         try {
+            $folder = Folder::find($folder_id);
             $user = Auth::user();
-            $folder = Folder::find($id);
-            $folder_user_id = $folder->user_id;
+            $folder_user_id = $folder->user->id;
             if ($user->id == $folder_user_id) {
                 return response()->json($folder, 200);
             }
             else {
                 return response()->json([
-                    "message" => 'Can not find folder'
-                ]);
+                    "error" => 'Can not find folder'
+                ], 400);
             }
         }
         catch (\Exception $exception) {
             return response()->json([
-                "message" => 'Can not find folder'
-            ]);
+                "message" => $exception->getMessage()
+            ], 500);
+        }
+    }
+    public function index(Request $request) {
+        try {
+            $id = (int) $request->query('id');
+            $user = Auth::user();
+            $folder = Folder::find($id);
+            $folder_user_id = $folder->user_id;
+            $code = $request->query('code');
+            if ($user->id == $folder_user_id && $folder->code == $code) {
+                return response()->json($folder, 200);
+            }
+            else {
+                return response()->json([
+                    "error" => 'Can not find folder'
+                ], 400);
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "error" => 'Can not find folder'
+            ], 400);
         }
     }
     public function listFolders() {
@@ -103,7 +130,7 @@ class FolderController extends Controller
             ];
             try {
                 $folder->update($update_data);
-                return $this->index($folder_id);
+                return $this->folderDetail($folder_id);
             }
             catch (\Exception $exception) {
                 return response()->json([
@@ -129,31 +156,9 @@ class FolderController extends Controller
         }
     }
     public function modules(Request $request) {
-        $user = Auth::user();
-        $req_folder_id = $request->query('folder_id');
-        if ($req_folder_id) {
-            $folder = Folder::find($req_folder_id);
-            $folder_user_id = $folder->user->id;
-            if ($folder_user_id == $user->id) {
-                try {
-                    $module = DB::table('module')
-                        ->join('folder_has_module', 'module_id', '=', 'folder_has_module.module_id')
-                        ->where('folder_has_module.folder_id', '=', $req_folder_id)
-                        ->select('module.*')
-                        ->get();
-                    return response()->json($module, 200);
-                }
-                catch (\Exception $exception) {
-                    return response()->json([
-                        'message' => 'Get modules by folder failed'
-                    ], 500);
-                }
-            }
-            else {
-                return response()->json([
-                    'message' => 'Get modules by folder failed'
-                ], 500);
-            }
+        $folder_id = $request->query('folder_id');
+        if ($folder_id) {
+            return $this->module_service->modulesInFolderService($folder_id);
         }
     }
     public function assignModule($module_id, $folder_id) {
@@ -170,7 +175,7 @@ class FolderController extends Controller
             ];
             try {
                 $instance = FolderHasModule::create($data);
-                return response()->json($instance, 200);
+                return $this->module_service->modulesInFolderService($folder_id);
             }
             catch (\Exception $exception) {
                 return response()->json([
@@ -187,16 +192,56 @@ class FolderController extends Controller
     public function deleteModuleFromFolder(Request $request) {
         $module_id = $request->query('module_id');
         $folder_id = $request->query('folder_id');
-        try {
-            FolderHasModule::where('module_id', '=', $module_id)
-                ->where('folder_id', '=', $folder_id)
-                ->delete();
-            return $this->modules($request);
+        $user = Auth::user();
+        $folder = Folder::find($folder_id);
+        if ($user->id == $folder->user->id) {
+            try {
+                FolderHasModule::where('module_id', '=', $module_id)
+                    ->where('folder_id', '=', $folder_id)
+                    ->delete();
+                return $this->module_service->modulesInFolderService($folder_id);
+            }
+            catch (\Exception $exception) {
+                return response()->json([
+                    'message' => $exception->getMessage()
+                ], 500);
+            }
         }
-        catch (\Exception $exception) {
+        else {
             return response()->json([
                 'message' => 'Delete module failed'
             ], 500);
+        }
+    }
+    public function addModuleInFolder($id, $code, Request $request) {
+        $user = Auth::user();
+        $folder = Folder::find($id);
+        $folder_user_id = $folder->user->id;
+        if ($user && $user->id == $folder_user_id && $folder->code == $code) {
+            try {
+                $module = $this->module_service->create($request)->original;
+                if ($module) {
+                    $current_time = getCurrentTime();
+                    $data = [
+                        'folder_id' => $id,
+                        'module_id' => $module->id,
+                        'created_at' => $current_time,
+                        'updated_at' => $current_time
+                    ];
+                    $instance = FolderHasModule::create($data);
+                    return $this->module_service->modulesInFolderService($id);
+                }
+                else {
+                    return response()->json([
+                        "message" => 'Can not create module'
+                    ]);
+                }
+            }
+            catch (\Exception $exception) {
+                return response()->json([
+                    "message" => $exception->getMessage()
+                ], 500);
+            }
         }
     }
 }

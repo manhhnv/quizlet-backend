@@ -3,8 +3,8 @@ use App\Models\User;
 
 if (!function_exists('getLastUserId')) {
     function getLastUserId() {
-        $id = User::latest('id')->first();
-        if ($id) return $id;
+        $user = User::latest('id')->first();
+        if ($user) return $user->id;
         return 0;
     }
 }
