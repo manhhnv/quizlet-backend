@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyAccount;
 use App\Jobs\SendVerifyMail;
@@ -129,6 +130,16 @@ public function signup(Request $request) {
                     ->update(['verified' => 1, 'updated_at' => getCurrentTime()]);
                 $user = User::find($user['id']);
                 if ($user->verified == 1) {
+                    DB::table('role_user')->insert([
+                        [
+                            'user_id' => $user->id,
+                            'role_id' => 1
+                        ],
+                        [
+                            'user_id' => $user->id,
+                            'role_id' => 2
+                        ]
+                    ]);
                     return Redirect::to('http://localhost:3000/home');
                 }
             }

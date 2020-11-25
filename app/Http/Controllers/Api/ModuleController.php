@@ -82,13 +82,19 @@ class ModuleController extends Controller
     public function update($id, Request $request) {
         $query = $request->query();
         $user = Auth::user();
-        if ($user) {
+//        $user = new User($user);
+        $module = Module::find($id);
+        $user = User::find($user->id);
+//        $this->authorize('update', $module);
+        if ($user->can('update', $module)) {
             $current_time = getCurrentTime();
-            $module = Module::where('id', $id)->where('user_id', $user->id)->first();
+//            $module = Module::where('id', $id)->where('user_id', $user->id)->first();
+            $module = Module::where('id', $id)->first();
             if ($module) {
                 $module_update_data = [
                     'name' => isset($query['name']) ? htmlspecialchars($query['name']) : $module->name,
                     'public' => isset($query['public']) ? (int) $query['public'] : $module->public,
+                    'updated_at' => $current_time
                 ];
                 try {
                     Module::find($id)

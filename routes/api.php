@@ -106,3 +106,13 @@ Route::group([
     Route::delete('delete-joined-member', 'Api\MembersController@deleteMemberFromClass');
 });
 //Route::get('test/{email}', 'Api\AuthController@test');
+Route::group([
+    'prefix' => 'join',
+    'middleware' => 'auth:api'
+], function () {
+    Route::group([
+        'prefix' => 'module'
+    ], function () {
+        Route::get('/{id}', 'Api\ViewModule@viewModule');
+    });
+});
