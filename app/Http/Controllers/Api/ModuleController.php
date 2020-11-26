@@ -82,14 +82,9 @@ class ModuleController extends Controller
     public function update($id, Request $request) {
         $query = $request->query();
         $user = Auth::user();
-//        $user = new User($user);
-        $module = Module::find($id);
-        $user = User::find($user->id);
-//        $this->authorize('update', $module);
-        if ($user->can('update', $module)) {
+        if ($user) {
             $current_time = getCurrentTime();
-//            $module = Module::where('id', $id)->where('user_id', $user->id)->first();
-            $module = Module::where('id', $id)->first();
+            $module = Module::where('id', $id)->where('user_id', $user->id)->first();
             if ($module) {
                 $module_update_data = [
                     'name' => isset($query['name']) ? htmlspecialchars($query['name']) : $module->name,
@@ -134,6 +129,36 @@ class ModuleController extends Controller
     }
     public function modulesInFolderService($folder_id) {
         $user = Auth::user();
+        try {
+            if ($folder_id) {
+                $folder = Folder::find($folder_id);
+                $folder_user_id = $folder->user->id;
+                $modules = DB::table('module')
+                    ->join('folder_has_module', 'module_id', '=', 'module.id')
+                    ->where('folder_has_module.folder_id', '=', $folder_id)
+                    ->select('module.*')
+                    ->get();
+                if ($folder->public != 0) {
+                    return response()->json($modules, 200);
+                }
+                else {
+                    if ($folder_user_id == $user->id) {
+                        return response()->json($modules, 200);
+                    }
+                    else {
+                        return response()->json([
+                            "message" => 'Can not access this folder'
+                        ], 400);
+                    }
+                }
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => 'Can not access this folder'
+            ], 500);
+        }
+
         if ($folder_id) {
             $folder = Folder::find($folder_id);
             $folder_user_id = $folder->user->id;

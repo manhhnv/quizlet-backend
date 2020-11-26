@@ -153,8 +153,4 @@ public function signup(Request $request) {
             return response()->json($exception->getMessage(), 500);
         }
     }
-//    public function test ($email) {
-//        $checkVerified = User::where('email', $email)->get()->first();
-//        return response()->json($checkVerified);
-//    }
 }

@@ -14,7 +14,7 @@ trait HasPermissions
 
     public function hasRole($role) {
         if (is_string($role)) {
-            return $this->roles()->contains('name', $role);
+            return $this->roles->contains('name', $role);
         }
         return false;
     }
@@ -30,10 +30,10 @@ trait HasPermissions
     }
 
     public function getPermissions() {
-        $role = $this->roles()->first();
+        $role = $this->roles->first();
         if ($role) {
             if (!$role->relationLoaded('permissions')) {
-                $this->roles()->load('permissions');
+                $this->roles->load('permissions');
             }
         }
         return $this->permissionList ?? collect();

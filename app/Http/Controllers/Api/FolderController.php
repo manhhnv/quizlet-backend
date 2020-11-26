@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ShareLinkQuizlet;
 use App\Models\Folder;
 use App\Models\FolderHasModule;
 use App\Models\Module;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 
 class FolderController extends Controller
@@ -42,22 +44,33 @@ class FolderController extends Controller
     public function index(Request $request) {
         try {
             $id = (int) $request->query('id');
+            $code = $request->query('code');
             $user = Auth::user();
             $folder = Folder::find($id);
             $folder_user_id = $folder->user_id;
-            $code = $request->query('code');
-            if ($user->id == $folder_user_id && $folder->code == $code) {
-                return response()->json($folder, 200);
+
+            if ($folder->code == $code) {
+                if ($folder->public == 1) {
+                    return response()->json($folder, 200);
+                }
+                else {
+                    if ($folder_user_id == $user->id) {
+                        return response()->json($folder, 200);
+                    }
+                    else return response()->json([
+                        "message" => "Can not access this folder"
+                    ], 400);
+                }
             }
             else {
                 return response()->json([
-                    "error" => 'Can not find folder'
+                    "message" => 'Can not find folder'
                 ], 400);
             }
         }
         catch (\Exception $exception) {
             return response()->json([
-                "error" => 'Can not find folder'
+                "message" => $exception->getMessage()
             ], 400);
         }
     }
@@ -242,6 +255,65 @@ class FolderController extends Controller
                     "message" => $exception->getMessage()
                 ], 500);
             }
+        }
+    }
+    public function sharing($username, $folder_id, $code) {
+        $user = Auth::user();
+        $folder = Folder::find($folder_id);
+        $folder_user_id = $folder->user->id;
+        $shared_user = User::where('username', $username)->first();
+        if ($shared_user->id == $folder_user_id && $folder->code == $code) {
+            if ($user->id == $folder_user_id) {
+                return Redirect::to('localhost:3000/folder?code' . $code . '&id=' . $folder_id);
+            }
+            else {
+                if ($folder->public == 1) {
+
+                }
+            }
+        }
+    }
+    public function sendSharedLink(Request $request) {
+        $this->validate(
+            $request,
+            [
+                'from' => 'required|email',
+                'to' => 'required | email',
+                'link' => 'required | string'
+            ],
+            [
+                'from.email' => 'From address is email format',
+                'to.email' => 'To address is email format',
+                'link.required' => 'Link can not be blank'
+            ]
+        );
+        $from = $request->from;
+        $to = $request->to;
+        $link = $request->link;
+        $this->dispatch(new ShareLinkQuizlet($from, $to, $link));
+    }
+    public function generateLink($id, $code) {
+        try {
+            $folder = Folder::find($id);
+            if ($folder->code == $code) {
+                $folder_user_id = $folder->user->id;
+                $owner = User::find($folder_user_id);
+                $shared_link = 'http://localhost:3000/' . $owner->username . '/folder?' . 'code=' . $code . '&id=' . $id;
+//                $this->dispatch(new ShareLinkQuizlet($owner->email, $to_address, $shared_link));
+                return response()->json([
+                    "link" => $shared_link
+                ], 200);
+            }
+            else {
+                return response()->json([
+                    "message" => "Can not find folder"
+                ], 400);
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
         }
     }
 }
