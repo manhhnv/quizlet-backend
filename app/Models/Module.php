@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Module extends Model
 {
+    const PUBLIC_FLAG = 1;
+    const PRIVATE_FLAG = 0;
     protected $primaryKey = 'id';
     protected $table = 'module';
     protected $fillable = [

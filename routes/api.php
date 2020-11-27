@@ -85,6 +85,8 @@ Route::group([
     Route::put('update/{folder_id}', 'Api\FolderController@update');
     Route::delete('delete/{id}', 'Api\FolderController@delete');
     Route::get('folder-detail', 'Api\FolderController@folderDetail');
+    Route::get('generate-shared-link/{id}/{code}', 'Api\FolderController@generateLink');
+    Route::post('send-shared-link', 'Api\FolderController@sendSharedLink');
     Route::group([
         'prefix' => 'module'
     ], function (){
@@ -106,3 +108,18 @@ Route::group([
     Route::delete('delete-joined-member', 'Api\MembersController@deleteMemberFromClass');
 });
 //Route::get('test/{email}', 'Api\AuthController@test');
+Route::group([
+    'prefix' => 'join',
+    'middleware' => 'auth:api'
+], function () {
+    Route::group([
+        'prefix' => 'module'
+    ], function () {
+        Route::get('/{id}', 'Api\ViewModule@viewModule');
+    });
+    Route::group([
+        'prefix' => 'folder'
+    ], function () {
+        Route::get('sharing/{username}/{folder_id}/{code}', 'Api\FolderController@sharing');
+    });
+});
