@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassModel;
 use App\Models\Folder;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -155,33 +156,46 @@ class ModuleController extends Controller
         }
         catch (\Exception $exception) {
             return response()->json([
-                "message" => 'Can not access this folder'
+                "message" => $exception->getMessage()
             ], 500);
         }
-
-        if ($folder_id) {
-            $folder = Folder::find($folder_id);
-            $folder_user_id = $folder->user->id;
-            if ($folder_user_id == $user->id) {
-                try {
-                    $modules = DB::table('module')
-                        ->join('folder_has_module', 'module_id', '=', 'module.id')
-                        ->where('folder_has_module.folder_id', '=', $folder_id)
-                        ->select('module.*')
-                        ->get();
+        return response()->json([
+            "message" => 'Can not access this folder'
+        ], 500);
+    }
+    public function modulesInClassService($class_id) {
+        $user = Auth::user();
+        try {
+            if ($class_id) {
+                $class = ClassModel::find($class_id);
+                $class_user_id = $class->user->id;
+                $modules = DB::table('module')
+                    ->join('class_has_module', 'module.id', '=', 'class_has_module.module_id')
+                    ->where('class_has_module.class_id', '=', $class_id)
+                    ->select('module.*')
+                ->get();
+                if ($class->public != 0) {
                     return response()->json($modules, 200);
                 }
-                catch (\Exception $exception) {
-                    return response()->json([
-                        'message' => $exception->getMessage()
-                    ], 500);
+                else {
+                    if ($class_user_id == $user->id) {
+                        return response()->json($modules, 200);
+                    }
+                    else {
+                        return response()->json([
+                            "message" => 'Can not access this class'
+                        ], 400);
+                    }
                 }
             }
-            else {
-                return response()->json([
-                    'message' => 'Get modules by folder failed'
-                ], 500);
-            }
         }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
+        }
+        return response()->json([
+            "message" => 'Can not access this class'
+        ], 500);
     }
 }

@@ -42,9 +42,17 @@ Route::group([
     Route::post('create', 'Api\ClassController@create');
     Route::put('update/{id}', 'Api\ClassController@update');
     Route::delete('delete/{id}', 'Api\ClassController@delete');
-    Route::post('assign-module-to-class/{module_id}/{class_id}', 'Api\ClassController@assignModule');
-    Route::get('modules', 'Api\ClassController@modules');
-    Route::delete('delete-module/module', 'Api\ClassController@deleteModule');
+    Route::get('detail', 'Api\ClassController@index');
+    Route::get('generate-shared-link/{id}/{code}', 'Api\ClassController@generateLink');
+    Route::post('send-shared-link', 'Api\ClassController@sendSharedLink');
+    Route::group([
+        "prefix" => "module"
+    ], function () {
+        Route::post('assign-module-to-class/{module_id}/{class_id}', 'Api\ClassController@assignModule');
+        Route::get('all', 'Api\ClassController@modules');
+        Route::delete('delete-module/module', 'Api\ClassController@deleteModule');
+        Route::post('add-module-in-class/{id}/{code}', 'Api\ClassController@addModuleInClass');
+    });
     Route::group([
         'prefix' => 'folder'
     ], function () {
@@ -62,7 +70,6 @@ Route::group([
     Route::post('create', 'Api\ModuleController@create');
     Route::put('update/{id}', 'Api\ModuleController@update');
     Route::delete('delete/{id}', 'Api\ModuleController@delete');
-
     Route::group([
         'prefix' => 'term'
     ], function () {

@@ -136,10 +136,12 @@ class FolderController extends Controller
         );
         $folder = Folder::find($folder_id);
         if ($folder) {
+            $current_time = getCurrentTime();
             $update_data = [
                 'name' => isset($request->name) ? htmlspecialchars($request->name) : $folder->name,
                 'public' => isset($request->public) ? (int) $request->public : $folder->public,
-                'description' => htmlspecialchars($request->description)
+                'description' => htmlspecialchars($request->description),
+                'updated_at' => $current_time
             ];
             try {
                 $folder->update($update_data);
@@ -199,7 +201,7 @@ class FolderController extends Controller
         else {
             return response()->json([
                 'message' => 'Module not found'
-            ]);
+            ], 400);
         }
     }
     public function deleteModuleFromFolder(Request $request) {

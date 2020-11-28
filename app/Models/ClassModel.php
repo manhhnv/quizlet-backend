@@ -10,7 +10,8 @@ class ClassModel extends Model
 
     protected $table = 'class';
     protected $fillable = [
-        'id', 'name', 'public', 'user_id', 'created_at', 'updated_at', 'code'
+        'id', 'name', 'public', 'user_id', 'created_at', 'updated_at', 'code',
+        'description'
     ];
     public $timestamps = false;
     public function user() {
