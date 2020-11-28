@@ -23,6 +23,7 @@ public function signup(Request $request) {
                 'email' => 'required | string | email | unique:users',
                 'password' => 'required|min:6|regex:/^.*(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
                 'birthday' => 'required|date|date_format:Y-m-d',
+                'avatar' => 'file|max:4096'
             ],
             [
                 'username.required' => 'Username fill can not be blank!',
@@ -30,7 +31,8 @@ public function signup(Request $request) {
                 'password.required' => 'Password fill can not be blank!',
                 'password.min' => 'Password contain at least 6 characters, include uppercase, lowercase and number',
                 'password.regex' => 'Password must be included uppercase, lowercase and number',
-                'birthday.required' => 'Birthday can not be blank!'
+                'birthday.required' => 'Birthday can not be blank!',
+                'avatar.max' => 'Maximum file size to upload is 4MB (4096 KB)'
             ]
         );
         if ($request->hasFile('avatar')) {

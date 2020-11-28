@@ -133,3 +133,15 @@ Route::group([
         Route::get('sharing/{username}/{folder_id}/{code}', 'Api\FolderController@sharing');
     });
 });
+
+//SEARCH
+
+Route::group([
+    'prefix' => 'search',
+    'middleware' => 'auth:api'
+], function () {
+    Route::get('module', 'Api\SearchController@searchModule');
+    Route::get('folder', 'Api\SearchController@searchFolder');
+    Route::get('class', 'Api\SearchController@searchClass');
+    Route::get('user', 'Api\SearchController@searchUser');
+});
