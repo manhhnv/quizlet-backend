@@ -50,13 +50,16 @@ Route::group([
     ], function () {
         Route::post('assign-module-to-class/{module_id}/{class_id}', 'Api\ClassController@assignModule');
         Route::get('all', 'Api\ClassController@modules');
-        Route::delete('delete-module/module', 'Api\ClassController@deleteModule');
+        Route::delete('delete-from-class', 'Api\ClassController@deleteModule');
         Route::post('add-module-in-class/{id}/{code}', 'Api\ClassController@addModuleInClass');
     });
     Route::group([
         'prefix' => 'folder'
     ], function () {
-//        Route::
+        Route::post('assign-folder-to-class/{folder_id}/{class_id}', 'Api\ClassController@assignFolder');
+        Route::get('all', 'Api\ClassController@folders');
+        Route::delete('delete-from-class','Api\ClassController@deleteFolder');
+        Route::post('add-folder-in-class/{id}/{code}', 'Api\ClassController@addFolderToClass');
     });
 });
 

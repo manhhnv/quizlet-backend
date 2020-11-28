@@ -19,8 +19,10 @@ class ClassController extends Controller
 {
 
     private $module_service;
+    private $folder_service;
     public function __construct() {
         $this->module_service = new ModuleController();
+        $this->folder_service = new FolderController();
     }
 
     public function index(Request $request) {
@@ -187,7 +189,9 @@ class ClassController extends Controller
                     return $this->module_service->modulesInClassService($id);
                 }
                 else {
-                    return "Create module failed";
+                    return response()->json([
+                        "message" => "Create module failed"
+                    ], 400);
                 }
             }
             catch (\Exception $exception) {
@@ -223,7 +227,7 @@ class ClassController extends Controller
                 }
                 catch (\Exception $exception) {
                     return response([
-                        'message' => "Assign module to class failed !"
+                        'message' => $exception->getMessage()
                     ], 500);
                 }
             }
@@ -246,52 +250,54 @@ class ClassController extends Controller
                     ClassHasModule::where('class_id', '=', $req_class_id)
                         ->where('module_id', '=', $req_module_id)
                         ->delete();
-                    return $this->modules($request);
+                    return $this->module_service->modulesInClassService($req_class_id);
                 }
                 catch (\Exception $exception) {
-                    return response()->json(['message' => 'Not found'], 500);
+                    return response()->json(['message' => $exception->getMessage()], 500);
                 }
             }
         }
+        else {
+            return response()->json([
+                'message' => 'Delete module failed'
+            ], 400);
+        }
     }
-    public function getAllFolderInClass($class_id, $code) {
-        $class = ClassModel::find($class_id);
-        if ($class->code == $code) {
-            try {
-                $folders = DB::table('folder')
-                    ->join('class_has_folder', 'class_has_folder.folder_id', '=', 'folder.id')
-                    ->where('class_has_folder.class_id', '=', $class_id)
-                    ->select('folder.*')
-                    ->get();
-                return response()->json($folders, 200);
-            }
-            catch (\Exception $exception) {
-                return response()->json([
-                    "message" => $exception->getMessage()
-                ], 500);
-            }
+    public function folders(Request $request) {
+        $class_id = $request->query('class_id');
+        if ($class_id != null) {
+            return $this->folder_service->foldersInClassService($class_id);
         }
         else {
             return response()->json([
-                "message" => 'Can not get folders in this class'
+                "message" => "Error"
             ], 500);
         }
     }
-    public function addFolderToClass($class_id, $folder_id, $code) {
-        $class = ClassModel::find($class_id);
-        $folder = Folder::find($folder_id);
+
+    public function addFolderToClass($id, $code, Request $request) {
+        $class = ClassModel::find($id);
+        $class_user_id = $class->user->id;
         $user = Auth::user();
-        if ($class->code == $code && $folder->user->id == $user->id && $class->user->id == $user->id) {
-            $current_time = getCurrentTime();
-            $data = [
-                'folder_id' => $folder_id,
-                'class_id' => $class_id,
-                'created_at' => $current_time,
-                'updated_at' => $current_time
-            ];
+        if ($class_user_id == $user->id && $class->code == $code) {
             try {
-                $instance = ClassHasFolder::create($data);
-                return $this->getAllFolderInClass($class_id, $code);
+                $folder = $this->folder_service->create($request)->original;
+                if ($folder != null) {
+                    $current_time = getCurrentTime();
+                    $data = [
+                        'folder_id' => $folder->id,
+                        'class_id' => $id,
+                        'created_at' => $current_time,
+                        'updated_at' => $current_time
+                    ];
+                    $instance = ClassHasFolder::create($data);
+                    return $this->folder_service->foldersInClassService($id);
+                }
+                else {
+                    return response()->json([
+                        "message" => "Create folder failed"
+                    ], 400);
+                }
             }
             catch (\Exception $exception) {
                 return response()->json([
@@ -299,35 +305,74 @@ class ClassController extends Controller
                 ], 500);
             }
         }
-        else {
-            return response()->json([
-                "message" => 'Can not find class, folder'
-            ], 500);
-        }
     }
-    public function deleteFolderFromClass($class_id, $folder_id, $code) {
-        $class = ClassModel::find($class_id);
-        $folder = Folder::find($folder_id);
+    public function assignFolder($folder_id, $class_id) {
         $user = Auth::user();
-        if ($class->code == $code && $folder->user->id == $user->id && $class->user->id == $user->id) {
-            try {
-                ClassHasFolder::where('class_id', '=', $class_id)
-                    ->where('folder_id', '=', $folder_id)
-                    ->delete();
-                return $this->getAllFolderInClass($class_id, $code);
+        if ($user != null) {
+            $folder = Folder::find($folder_id);
+            $class = ClassModel::find($class_id);
+            if ($user->id == $folder->user->id && $user->id == $class->user->id) {
+                $current_time = getCurrentTime();
+                $data = [
+                    'folder_id' => (int) $folder_id,
+                    'class_id' => (int) $class_id,
+                    'created_at' => $current_time,
+                    'updated_at' => $current_time,
+                ];
+                try {
+                    $instance = ClassHasFolder::create($data);
+                    return $this->folder_service->foldersInClassService($class_id);
+                }
+                catch (\Exception $exception) {
+                    return response()->json([
+                        "message" => $exception->getMessage()
+                    ], 500);
+                }
             }
-            catch (\Exception $exception) {
+            else {
                 return response()->json([
-                    "message" => $exception->getMessage()
-                ], 500);
+                    "message" => 'You can not edit class'
+                ], 400);
             }
         }
         else {
             return response()->json([
-                "message" => "Not found"
-            ], 500);
+                "message" => 'You can not edit class'
+            ], 400);
         }
     }
+    public function deleteFolder(Request $request) {
+        $user = Auth::user();
+        $folder_id = $request->query('folder_id');
+        $class_id = $request->query('class_id');
+        if ($folder_id && $class_id) {
+            $class = ClassModel::find($class_id);
+            if ($user->id == $class->user->id) {
+                try {
+                    ClassHasFolder::where('class_id', '=', $class_id)
+                        ->where('folder_id', '=', $folder_id)
+                        ->delete();
+                    return $this->folder_service->foldersInClassService($class_id);
+                }
+                catch (\Exception $exception) {
+                    return response()->json([
+                        "message" => $exception->getMessage()
+                    ], 500);
+                }
+            }
+            else {
+                return response()->json([
+                    'message' => 'Delete folder failed'
+                ], 400);
+            }
+        }
+        else {
+            return response()->json([
+                'message' => 'Delete folder failed'
+            ], 400);
+        }
+    }
+
     public function generateLink($id, $code) {
         try {
             $class = ClassModel::find($id);

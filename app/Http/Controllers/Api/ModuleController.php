@@ -136,19 +136,21 @@ class ModuleController extends Controller
                 $folder_user_id = $folder->user->id;
                 $modules = DB::table('module')
                     ->join('folder_has_module', 'module_id', '=', 'module.id')
-                    ->where('folder_has_module.folder_id', '=', $folder_id)
-                    ->select('module.*')
-                    ->get();
-                if ($folder->public != 0) {
+                    ->where('folder_has_module.folder_id', '=', $folder_id);
+                if ($folder_user_id == $user->id) {
+                    $modules = $modules->select('module.*')->get();
                     return response()->json($modules, 200);
                 }
                 else {
-                    if ($folder_user_id == $user->id) {
+                    if ($folder->public != 0) {
+                        $modules = $modules->where('module.public', '<>', 0)
+                            ->select('module.*')
+                            ->get();
                         return response()->json($modules, 200);
                     }
                     else {
                         return response()->json([
-                            "message" => 'Can not access this folder'
+                            "message" => 'You can not access this folder'
                         ], 400);
                     }
                 }
@@ -171,19 +173,22 @@ class ModuleController extends Controller
                 $class_user_id = $class->user->id;
                 $modules = DB::table('module')
                     ->join('class_has_module', 'module.id', '=', 'class_has_module.module_id')
-                    ->where('class_has_module.class_id', '=', $class_id)
-                    ->select('module.*')
-                ->get();
-                if ($class->public != 0) {
+                    ->where('class_has_module.class_id', '=', $class_id);
+                if ($user->id == $class_user_id) {
+                    $modules = $modules->select('module.*')
+                        ->get();
                     return response()->json($modules, 200);
                 }
                 else {
-                    if ($class_user_id == $user->id) {
+                    if ($class->public != 0) {
+                        $modules = $modules->where('module.public', '<>', 0)
+                            ->select('module.*')
+                            ->get();
                         return response()->json($modules, 200);
                     }
                     else {
                         return response()->json([
-                            "message" => 'Can not access this class'
+                            "message" => 'You can not access this folder'
                         ], 400);
                     }
                 }

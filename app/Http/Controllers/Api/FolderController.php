@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ShareLinkQuizlet;
+use App\Models\ClassModel;
 use App\Models\Folder;
 use App\Models\FolderHasModule;
 use App\Models\Module;
@@ -310,6 +311,40 @@ class FolderController extends Controller
                 return response()->json([
                     "message" => "Can not find folder"
                 ], 400);
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
+        }
+    }
+    public function foldersInClassService($class_id) {
+        $user = Auth::user();
+        try {
+            if ($class_id) {
+                $class = ClassModel::find($class_id);
+                $class_user_id = $class->user->id;
+                $folders = DB::table('folder')
+                    ->join('class_has_folder', 'folder.id', '=', 'class_has_folder.folder_id')
+                    ->where('class_has_folder.class_id', '=', $class_id);
+                if ($user->id == $class_user_id) {
+                    $folders = $folders->select('folder.*')->get();
+                    return response()->json($folders, 200);
+                }
+                else {
+                    if ($class->public != 0) {
+                        $folders = $folders->where('folder.public', '<>', 0)
+                            ->select('folder.*')
+                            ->get();
+                        return response()->json($folders, 200);
+                    }
+                    else {
+                        return response()->json([
+                            "message" => 'You can not access this class'
+                        ], 400);
+                    }
+                }
             }
         }
         catch (\Exception $exception) {
