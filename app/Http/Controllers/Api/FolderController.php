@@ -7,6 +7,7 @@ use App\Jobs\ShareLinkQuizlet;
 use App\Models\ClassModel;
 use App\Models\Folder;
 use App\Models\FolderHasModule;
+use App\Models\MembersHasClasses;
 use App\Models\Module;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -333,15 +334,25 @@ class FolderController extends Controller
                     return response()->json($folders, 200);
                 }
                 else {
-                    if ($class->public != 0) {
-                        $folders = $folders->where('folder.public', '<>', 0)
-                            ->select('folder.*')
-                            ->get();
-                        return response()->json($folders, 200);
+                    $joinedClass = MembersHasClasses::where('member_id', '=', $user->id)
+                        ->where('class_id', '=', $class_id)
+                        ->first();
+                    if ($joinedClass != null) {
+                        if ($class->public != 0) {
+                            $folders = $folders->where('folder.public', '<>', 0)
+                                ->select('folder.*')
+                                ->get();
+                            return response()->json($folders, 200);
+                        }
+                        else {
+                            return response()->json([
+                                "message" => 'You can not access this class'
+                            ], 400);
+                        }
                     }
                     else {
                         return response()->json([
-                            "message" => 'You can not access this class'
+                            "message" => "You not joined this class"
                         ], 400);
                     }
                 }

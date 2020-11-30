@@ -61,6 +61,14 @@ Route::group([
         Route::delete('delete-from-class','Api\ClassController@deleteFolder');
         Route::post('add-folder-in-class/{id}/{code}', 'Api\ClassController@addFolderToClass');
     });
+    Route::group([
+        'prefix' => 'join'
+    ], function () {
+        Route::post('join-request/{class_id}', 'Api\ClassController@sendJoinRequest');
+        Route::get('confirm/{class_id}/{user_id}', 'Api\ClassController@confirmJoinRequest');
+        Route::get('management/member/{class_id}', 'Api\ClassController@managementMemberInClass');
+        Route::get('management/joinedClass', 'Api\ClassController@listJoinedClass');
+    });
 });
 
 //Module

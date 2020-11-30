@@ -20,8 +20,8 @@ class SearchController extends Controller
 
     public function searchModule(Request $request){
         $name = $request->query('name');
-        $order = $request->query('order');
-        $type_sort = $request->query('type_sort');
+        $order = $request->query('sortBy');
+        $type_sort = $request->query('sortType');
 
         if (!in_array($order, $this->key_search) || $order == 'username') {
             $order = 'name';
@@ -33,14 +33,22 @@ class SearchController extends Controller
         if ($user != null) {
             try {
                 $module = DB::table('module')
+                    ->join('users', 'module.user_id', '=', 'users.id')
+                    ->join('term', 'term.module_id', '=', 'module.id')
                     ->where('name', 'like', '%'.$name . '%')
                     ->where('public', '<>', 0)
                     ->orWhere(function ($query) use($user, $name) {
                         $query->where('user_id', '=', $user->id)
                             ->where('name', 'like', '%'.$name . '%');
                     })
+                    ->groupBy('module.id')
                     ->orderBy($order, $type_sort)
-                    ->paginate(10);
+//                    ->select(DB::raw(' SELECT COUNT(term.*) FROM term'))
+                    ->select(array('module.*', 'users.username', DB::table('term')->raw('count(*) as terms')))
+//                    ->addSelect(array('module.*', 'users.username'))
+                    //                    ->selectRaw('count(*)')
+//                    ->paginate(1);
+                    ->get();
                 return response()->json($module, 200);
             }
             catch (\Exception $exception) {
@@ -57,8 +65,8 @@ class SearchController extends Controller
     }
     public function searchFolder(Request $request) {
         $name = $request->query('name');
-        $order = $request->query('order');
-        $type_sort = $request->query('type_sort');
+        $order = $request->query('sortBy');
+        $type_sort = $request->query('sortType');
         if (!in_array($order, $this->key_search) || $order == 'username') {
             $order = 'name';
         }
@@ -68,14 +76,17 @@ class SearchController extends Controller
         $user = Auth::user();
         try {
             $folders = DB::table('folder')
+                ->join('users', 'folder.user_id', '=', 'users.id')
                 ->where('name', 'like', '%'.$name.'%')
                 ->where('public', '<>', 0)
                 ->orWhere(function ($query) use ($user, $name) {
                     $query->where('user_id', '=', $user->id)
-                        ->where('name', 'like', $name);
+                        ->where('name', 'like', '%'.$name.'%');
                 })
                 ->orderBy($order, $type_sort)
-                ->paginate(10);
+                ->select(array('folder.*', 'users.username'))
+                ->get();
+//                ->paginate(10);
             return response()->json($folders, 200);
         }
         catch (\Exception $exception) {
@@ -98,6 +109,7 @@ class SearchController extends Controller
         $user = Auth::user();
         try {
             $classes = DB::table('class')
+                ->join('users', 'class.user_id', '=', 'users.id')
                 ->where('name', 'like', '%'.$name.'%')
                 ->where('public', '<>', 0)
                 ->orWhere(function ($query) use ($user, $name) {
@@ -105,7 +117,9 @@ class SearchController extends Controller
                        ->where('name', 'like', '%'.$name.'%');
                 })
                 ->orderBy($order, $type_sort)
-                ->paginate(10);
+                ->select(array('class.*', 'users.username'))
+                ->get();
+//                ->paginate(10);
             return response()->json($classes, 200);
         }
         catch (\Exception $exception) {

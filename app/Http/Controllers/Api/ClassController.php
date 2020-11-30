@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendJoinRequest;
 use App\Jobs\ShareLinkQuizlet;
 use App\Models\ClassHasFolder;
 use App\Models\ClassHasModule;
 use App\Models\ClassModel;
 use App\Models\Folder;
+use App\Models\Members;
+use App\Models\MembersHasClasses;
 use App\Models\Module;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 
 class ClassController extends Controller
@@ -94,8 +98,17 @@ class ClassController extends Controller
                 'created_at' => $current_time,
                 'updated_at' => $current_time
             ];
+
             try {
                 $class = ClassModel::create($class_data);
+                $admin_data = [
+                    'member_id' => $user->id,
+                    'class_id' => $class->id,
+                    'role_id' => 1,
+                    'created_at' => $current_time,
+                    'updated_at' => $current_time
+                ];
+                MembersHasClasses::create($admin_data);
                 return response()->json($class, 200);
             }
             catch (\Exception $exception) {
@@ -414,5 +427,109 @@ class ClassController extends Controller
         $to = $request->to;
         $link = $request->link;
         $this->dispatch(new ShareLinkQuizlet($from, $to, $link));
+    }
+    public function managementMemberInClass($class_id) {
+        $user = Auth::user();
+        $class = ClassModel::find($class_id);
+        if ($user->id == $class->user->id) {
+            try {
+                $members = DB::table('members_has_classes')
+                    ->join('members', 'members_has_classes.member_id', '=', 'members.user_id')
+                    ->select(array('members.*', 'members_has_classes.role_id'))
+                    ->get();
+                return response()->json($members, 200);
+            }
+            catch (\Exception $exception) {
+                return response()->json([
+                    "message" => $exception->getMessage()
+                ], 500);
+            }
+        }
+    }
+    public function confirmJoinRequest($class_id, $user_id) {
+        $user = Auth::user();
+        $class = ClassModel::find($class_id);
+        if ($user->id == $user_id || $class->user->id == $user->id) {
+            return response()->json([
+                'message' => 'You are admin in this class'
+            ], 400);
+        }
+        else {
+            $realMember = Members::find($user_id);
+            $joinedClass = MembersHasClasses::where('member_id', '=', $user_id)
+                ->where('class_id', '=', $class_id)
+                ->first();
+            if ($joinedClass != null) {
+                return response()->json([
+                    "message" => "You already joined this class"
+                ], 400);
+            }
+            else {
+                if ($realMember != null) {
+                    $current_time = getCurrentTime();
+                    $data = [
+                        "member_id" => (int) $user_id,
+                        "class_id" => (int) $class_id,
+                        "created_at" => $current_time,
+                        'role_id' => 2,
+                        "updated_at" => $current_time
+                    ];
+                    try {
+                        $instance = MembersHasClasses::create($data);
+                        return Redirect::to("http://localhost:3000/overview");
+                    }
+                    catch (\Exception $exception) {
+                        return response()->json([
+                            "message" => $exception->getMessage()
+                        ], 500);
+                    }
+                }
+            }
+        }
+    }
+    public function sendJoinRequest($class_id) {
+        try {
+            $class = ClassModel::find($class_id);
+            $owner = $class->user;
+            $user = Auth::user();
+            if ($user->id == $owner->id) {
+                return response()->json([
+                    "message" => "You are admin this class"
+                ], 400);
+            }
+            else {
+                if ($class->public == 0) {
+                    return response()->json([
+                        "message" => "You can not access this class"
+                    ], 400);
+                }
+                else {
+                    $link = 'http://localhost:3000/api/class/join/confirm/' . $class_id . '/'. $user->id;
+                    $this->dispatch(new SendJoinRequest($user->email, $owner->email, $link));
+                }
+            }
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
+        }
+    }
+    public function listJoinedClass () {
+        $user = Auth::user();
+        try {
+            $classes = DB::table('class')
+                ->join('members_has_classes','members_has_classes.class_id', '=', 'class.id')
+                ->where('members_has_classes.member_id', '=', $user->id)
+                ->where('members_has_classes.role_id', '<>', 1)
+                ->select('class.*')
+                ->get();
+            return response()->json($classes, 200);
+        }
+        catch (\Exception $exception) {
+            return response()->json([
+                "message" => $exception->getMessage()
+            ], 500);
+        }
     }
 }

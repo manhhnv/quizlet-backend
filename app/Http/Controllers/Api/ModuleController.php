@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ClassModel;
 use App\Models\Folder;
+use App\Models\MembersHasClasses;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Module;
@@ -180,15 +181,25 @@ class ModuleController extends Controller
                     return response()->json($modules, 200);
                 }
                 else {
-                    if ($class->public != 0) {
-                        $modules = $modules->where('module.public', '<>', 0)
-                            ->select('module.*')
-                            ->get();
-                        return response()->json($modules, 200);
+                    $joinedClass = MembersHasClasses::where('member_id', '=', $user->id)
+                        ->where('class_id', '=', $class_id)
+                        ->first();
+                    if ($joinedClass != null) {
+                        if ($class->public != 0) {
+                            $modules = $modules->where('module.public', '<>', 0)
+                                ->select('module.*')
+                                ->get();
+                            return response()->json($modules, 200);
+                        }
+                        else {
+                            return response()->json([
+                                "message" => 'You can not access this folder'
+                            ], 400);
+                        }
                     }
                     else {
                         return response()->json([
-                            "message" => 'You can not access this folder'
+                            "message" => "You not joined this class"
                         ], 400);
                     }
                 }

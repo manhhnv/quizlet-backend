@@ -8,7 +8,7 @@ class MembersHasClasses extends Model
 {
     protected $table = 'members_has_classes';
     protected $fillable = [
-        'member_id', 'class_id', 'created_at', 'updated_at'
+        'member_id', 'class_id', 'created_at', 'updated_at', 'role_id'
     ];
     public $timestamps = false;
     public $incrementing = false;

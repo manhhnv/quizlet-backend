@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Members;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -142,6 +143,14 @@ public function signup(Request $request) {
                             'role_id' => 2
                         ]
                     ]);
+                    $current_time = getCurrentTime();
+                    $member_data = [
+                        'username' => $user->username,
+                        'user_id' => $user->id,
+                        'created_at' => $current_time,
+                        'updated_at' => $current_time
+                    ];
+                    Members::create($member_data);
                     return Redirect::to('http://localhost:3000/home');
                 }
             }
