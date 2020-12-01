@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableTesing extends Migration
+class CreateTestingTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,13 +14,11 @@ class CreateTableTesing extends Migration
     public function up()
     {
         Schema::create('testing', function (Blueprint $table) {
-            $table->id();
             $table->string('answer', 255)->nullable(false);
-            $table->boolean('correct')->default(false);
+            $table->boolean('correct')->nullable(false)->default(true);
             $table->unsignedBigInteger('term_id');
             $table->foreign('term_id')->references('id')->on('term')
                 ->onDelete('cascade');
-            $table->timestamps();
         });
     }
 

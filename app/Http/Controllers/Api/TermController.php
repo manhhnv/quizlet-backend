@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\Term;
+use App\Models\Testing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +19,26 @@ class TermController extends Controller
         try {
             $module = Module::find($module_id);
             $terms = $module->terms;
-            return response($terms, 200);
+            $user = Auth::user();
+            if ($user->id == $module->user->id) {
+                return response()->json([
+                    "creator" => $user->id,
+                    "terms" => $terms
+                ], 200);
+            }
+            else {
+                if ($module->public != 0 ) {
+                    return response()->json([
+                        "creator" => $module->user->id,
+                        "terms" => $terms
+                    ], 200);
+                }
+                else {
+                    return response()->json([
+                        "message" => "You can not access this module"
+                    ], 400);
+                }
+            }
         }
         catch (\Exception $exception) {
             return response()->json([
@@ -57,6 +77,12 @@ class TermController extends Controller
             ];
             try {
                 $term = Term::create($term_data);
+                $testing = [
+                    'answer' => $term->explain,
+                    'correct' => 1,
+                    'term_id' => $term->id
+                ];
+                $instance = Testing::create($testing);
                 return response()->json($term, 200);
             }
             catch (\Exception $exception) {

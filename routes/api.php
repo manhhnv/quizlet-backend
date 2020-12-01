@@ -65,11 +65,14 @@ Route::group([
         'prefix' => 'join'
     ], function () {
         Route::post('join-request/{class_id}', 'Api\ClassController@sendJoinRequest');
-        Route::get('confirm/{class_id}/{user_id}', 'Api\ClassController@confirmJoinRequest');
-        Route::get('management/member/{class_id}', 'Api\ClassController@managementMemberInClass');
-        Route::get('management/joinedClass', 'Api\ClassController@listJoinedClass');
+//        Route::get('confirm/{class_id}/{user_id}', 'Api\ClassController@confirmJoinRequest');
+        Route::get('management/member/{class_id}/{code}', 'Api\ClassController@managementMemberInClass');
+        Route::get('joinedClass', 'Api\ClassController@listJoinedClass');
+        Route::delete('remove/member/{class_id}/{member_id}', 'Api\ClassController@removeMember');
     });
 });
+Route::get('class/join/confirm/{class_id}/{user_id}', 'Api\ClassController@confirmJoinRequest');
+
 
 //Module
 Route::group([
@@ -81,6 +84,7 @@ Route::group([
     Route::post('create', 'Api\ModuleController@create');
     Route::put('update/{id}', 'Api\ModuleController@update');
     Route::delete('delete/{id}', 'Api\ModuleController@delete');
+    Route::get('detail', 'Api\ModuleController@index');
     Route::group([
         'prefix' => 'term'
     ], function () {
@@ -89,6 +93,11 @@ Route::group([
         Route::get('get-list-terms/{module_id}', 'Api\TermController@getTermByModule');
         Route::put('update-term-by-module/{module_id}/{term_id}', 'Api\TermController@update');
         Route::delete('delete/{module_id}/{term_id}', 'Api\TermController@delete');
+    });
+    Route::group([
+        "prefix" => "test"
+    ], function () {
+        Route::get('/{module_id}/testing', 'Api\TestController@getQuestions');
     });
 });
 

@@ -16,8 +16,21 @@ class ModuleController extends Controller
 {
     public function index($id) {
         try {
+            $user = Auth::user();
             $module = Module::find($id);
-            return response()->json($module, 200);
+            if ($user->id == $module->user->id) {
+                return response()->json($module, 200);
+            }
+            else {
+                if ($module->public != 0) {
+                    return response()->json($module, 200);
+                }
+                else {
+                    return response()->json([
+                        "message" => "You can not access this module"
+                    ], 400);
+                }
+            }
         }
         catch (\Exception $exception) {
             return response()->json([

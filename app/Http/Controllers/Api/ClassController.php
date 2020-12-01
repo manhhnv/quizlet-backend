@@ -36,16 +36,21 @@ class ClassController extends Controller
             $user = Auth::user();
             $class = ClassModel::find($id);
             if ($class->code == $code) {
-                if ($class->public == 1) {
+                if ($class->user->id == $user->id) {
                     return response()->json($class, 200);
                 }
                 else {
-                    if ($class->user->id == $user->id) {
+                    $joinedMember = MembersHasClasses::where ('member_id', '=', $user->id)
+                        ->where('class_id', '=', $id)
+                        ->first();
+                    if ($joinedMember != null && $class->public == 1) {
                         return response()->json($class, 200);
                     }
-                    else return response()->json([
-                        "message" => "Can not access this class"
-                    ], 400);
+                    else {
+                        return response()->json([
+                            "message" => "Can not access this class"
+                        ], 400);
+                    }
                 }
             }
             else {
@@ -428,10 +433,10 @@ class ClassController extends Controller
         $link = $request->link;
         $this->dispatch(new ShareLinkQuizlet($from, $to, $link));
     }
-    public function managementMemberInClass($class_id) {
+    public function managementMemberInClass($class_id, $code) {
         $user = Auth::user();
         $class = ClassModel::find($class_id);
-        if ($user->id == $class->user->id) {
+        if ($user->id == $class->user->id && $class->code == $code) {
             try {
                 $members = DB::table('members_has_classes')
                     ->join('members', 'members_has_classes.member_id', '=', 'members.user_id')
@@ -447,22 +452,20 @@ class ClassController extends Controller
         }
     }
     public function confirmJoinRequest($class_id, $user_id) {
-        $user = Auth::user();
+//        $user = Auth::user();
         $class = ClassModel::find($class_id);
-        if ($user->id == $user_id || $class->user->id == $user->id) {
-            return response()->json([
-                'message' => 'You are admin in this class'
-            ], 400);
-        }
-        else {
+//        if ($user->id == $user_id || $class->user->id == $user->id) {
+//            return response()->json([
+//                'message' => 'You are admin in this class'
+//            ], 400);
+//        }
+//        else {
             $realMember = Members::find($user_id);
             $joinedClass = MembersHasClasses::where('member_id', '=', $user_id)
                 ->where('class_id', '=', $class_id)
                 ->first();
             if ($joinedClass != null) {
-                return response()->json([
-                    "message" => "You already joined this class"
-                ], 400);
+                return Redirect::to("http://localhost:3000/overview");
             }
             else {
                 if ($realMember != null) {
@@ -485,7 +488,7 @@ class ClassController extends Controller
                     }
                 }
             }
-        }
+//        }
     }
     public function sendJoinRequest($class_id) {
         try {
@@ -504,8 +507,18 @@ class ClassController extends Controller
                     ], 400);
                 }
                 else {
-                    $link = 'http://localhost:3000/api/class/join/confirm/' . $class_id . '/'. $user->id;
-                    $this->dispatch(new SendJoinRequest($user->email, $owner->email, $link));
+                    $joinedMember = MembersHasClasses::where('class_id', '=', $class_id)
+                        ->where('member_id', '=', $user->id)
+                        ->first();
+                    if ($joinedMember != null) {
+                        return response()->json([
+                            "message" => "You already joined this class"
+                        ], 400);
+                    }
+                    else {
+                        $link = 'http://localhost:9000/api/class/join/confirm/' . $class_id . '/'. $user->id;
+                        $this->dispatch(new SendJoinRequest($user->email, $owner->email, $link));
+                    }
                 }
             }
         }
@@ -520,15 +533,40 @@ class ClassController extends Controller
         try {
             $classes = DB::table('class')
                 ->join('members_has_classes','members_has_classes.class_id', '=', 'class.id')
+                ->join('users', 'class.user_id', '=', 'users.id')
                 ->where('members_has_classes.member_id', '=', $user->id)
                 ->where('members_has_classes.role_id', '<>', 1)
-                ->select('class.*')
+                ->select(array('class.*', 'users.username'))
                 ->get();
             return response()->json($classes, 200);
         }
         catch (\Exception $exception) {
             return response()->json([
                 "message" => $exception->getMessage()
+            ], 500);
+        }
+    }
+    public function removeMember($class_id, $member_id) {
+        $user = Auth::user();
+        $inClass = MembersHasClasses::where('member_id', '=', $user->id)
+            ->where('class_id', '=', $class_id)
+            ->first();
+        if ($inClass->role_id == 1) {
+            try {
+                MembersHasClasses::where('member_id', '=', $member_id)
+                    ->where('class_id', '=', $class_id)
+                    ->delete();
+                return $this->managementMemberInClass($class_id);
+            }
+            catch (\Exception $exception) {
+                return response()->json([
+                    "message" => $exception->getMessage()
+                ], 500);
+            }
+        }
+        else {
+            return response()->json([
+                "message" => "You need to permission"
             ], 500);
         }
     }
