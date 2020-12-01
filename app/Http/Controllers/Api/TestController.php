@@ -19,7 +19,7 @@ class TestController extends Controller
     }
     public function getWrongAnswer($term_id) {
         return DB::table('testing')
-            ->select('answer')
+            ->select('answer as item')
             ->where('term_id', '<>', $term_id)
             ->limit(3)
             ->get();
