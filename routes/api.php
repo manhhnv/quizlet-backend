@@ -98,6 +98,7 @@ Route::group([
         "prefix" => "test"
     ], function () {
         Route::get('/{module_id}/testing', 'Api\TestController@getQuestions');
+        Route::post('finish', 'Api\TestController@checkAnswer');
     });
 });
 

@@ -44,4 +44,16 @@ class TestController extends Controller
             return response()->json($set);
         }
     }
+    public function checkAnswer(Request $request) {
+        $sets = $request->sets;
+        $score = 0;
+        foreach ($sets as $key => $value) {
+            $term_id = $sets[$key]['id'];
+            $term = Term::find($term_id);
+            if ($term->explain == $sets[$key]['answer']) {
+                $score += (int) $term->score;
+            }
+        }
+        return $score;
+    }
 }
