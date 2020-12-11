@@ -548,26 +548,21 @@ class ClassController extends Controller
     }
     public function removeMember($class_id, $member_id) {
         $user = Auth::user();
+        $class = ClassModel::find($class_id);
         $inClass = MembersHasClasses::where('member_id', '=', $user->id)
             ->where('class_id', '=', $class_id)
             ->first();
-        if ($inClass->role_id == 1) {
             try {
                 MembersHasClasses::where('member_id', '=', $member_id)
                     ->where('class_id', '=', $class_id)
                     ->delete();
-                return $this->managementMemberInClass($class_id);
+                return $this->managementMemberInClass($class_id, $class->code);
             }
             catch (\Exception $exception) {
                 return response()->json([
                     "message" => $exception->getMessage()
                 ], 500);
             }
-        }
-        else {
-            return response()->json([
-                "message" => "You need to permission"
-            ], 500);
-        }
+
     }
 }
